@@ -3,6 +3,7 @@ package com.redis.example.utils;
 import com.redis.example.cache.LRUCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;

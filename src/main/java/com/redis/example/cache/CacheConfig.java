@@ -1,5 +1,6 @@
 package com.redis.example.cache;
 
+import com.redis.example.utils.AsyncFunctions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,10 @@ public class CacheConfig implements Serializable {
 
     public static CacheConfig instance;
 
+    public Integer getSelectedDb() {
+        return selectedDb;
+    }
+
     private Integer selectedDb;
 
     //TODO: read from env
@@ -40,6 +45,17 @@ public class CacheConfig implements Serializable {
 
     }
 
+    public static void changeSelectedDb(Integer db){
+        instance.selectedDb = db;
+        AsyncFunctions asyncFunctions = new AsyncFunctions();
+        try {
+            asyncFunctions.save_object_on_path_async(configPath, instance);
+        } catch (Exception e){
+            logger.error(e);
+            logger.debug("error when writing cache config file to this path : "+configPath);
+        }
+    }
+
     public static CacheConfig getInstance() {
         if (instance == null)
             instance = new CacheConfig();
@@ -50,7 +66,7 @@ public class CacheConfig implements Serializable {
     private CacheConfig load_config_from_file(){
         CacheConfig cacheConfig = (CacheConfig) functions.read_object_from_file(configPath);
         if (cacheConfig == null){
-            cacheConfig = new CacheConfig(1);
+            cacheConfig = new CacheConfig(0);
             try {
                 functions.save_object_on_path(configPath, cacheConfig);
             } catch (Exception e){

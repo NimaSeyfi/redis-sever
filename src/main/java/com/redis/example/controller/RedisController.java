@@ -8,10 +8,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
+import javax.validation.constraints.*;
+import java.util.List;
 
 
 @RestController
@@ -49,29 +51,33 @@ public class RedisController {
         return new ResponseEntity<>(generalResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/get")
-    public ResponseEntity<GeneralResponse> get(@Valid @RequestBody GetRequest request)
+    @GetMapping("/get")
+    public ResponseEntity<GeneralResponse> get(@Size(min = 1, max = 500, message = "key content size should fit in 1 to 500 characters")
+                                                   @NotNull(message = "key can't be null")
+                                                   @NotBlank(message = "key can't be blank")
+                                                   @NotEmpty(message = "key can't be empty")
+                                                   @RequestParam String key)
             throws Exception {
-        logger.info("Request for get : "+request.toString());
-        GeneralResponse generalResponse = redisService.get(request);
+        logger.info("Request for get : "+key);
+        GeneralResponse generalResponse = redisService.get(key);
         logger.info("Response : "+ generalResponse.toString());
         return new ResponseEntity<>(generalResponse, HttpStatus.OK);
     }
 
     @PostMapping("/del")
-    public ResponseEntity<GeneralResponse> del(@Valid @RequestBody DelRequest request)
+    public ResponseEntity<GeneralResponse> del(@Valid @RequestParam("key")List<String> keys)
             throws Exception {
-        logger.info("Request for del : "+request.toString());
-        GeneralResponse generalResponse = redisService.del(request);
+        logger.info("Request for del : "+keys.toString());
+        GeneralResponse generalResponse = redisService.del(keys);
         logger.info("Response : "+ generalResponse.toString());
         return new ResponseEntity<>(generalResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/exists")
-    public ResponseEntity<GeneralResponse> exists(@Valid @RequestBody ExistsRequest request)
+    @GetMapping("/exists")
+    public ResponseEntity<GeneralResponse> exists(@Valid @RequestParam("key")List<String> keys)
             throws Exception {
-        logger.info("Request for exists : "+request.toString());
-        GeneralResponse generalResponse = redisService.exists(request);
+        logger.info("Request for exists : "+keys.toString());
+        GeneralResponse generalResponse = redisService.exists(keys);
         logger.info("Response : "+ generalResponse.toString());
         return new ResponseEntity<>(generalResponse, HttpStatus.OK);
     }
